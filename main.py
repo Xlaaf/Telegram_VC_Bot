@@ -89,7 +89,7 @@ async def joinvc(_, message):
     chat_id = message.chat.id
     try:
         if str(chat_id) in call.keys():
-            await message.reply_text("__**Bot Is Already In The VC**__", quote=False)
+            await message.reply_text("__**Bot sudah siap memutar lagu**__", quote=False)
             return
         vc = GroupCall(
             client=app,
@@ -99,7 +99,7 @@ async def joinvc(_, message):
         )
         await vc.start(chat_id)
         call[str(chat_id)] = vc
-        await message.reply_text("__**Joined The Voice Chat.**__", quote=False)
+        await message.reply_text("__**Memasuki voice chat.**__", quote=False)
     except Exception as e:
         e = traceback.format_exc
         print(str(e))
@@ -111,7 +111,7 @@ async def leavevc(_, message):
     await vc.leave_current_group_call()
     await vc.stop()
     await message.reply_text(
-        "__**Left The Voice Chat, Restarting Client....**__", quote=False
+        "__**Keluar voice chat. Merestart client....**__", quote=False
     )
     os.execvp(
         f"python{str(pyver.split(' ')[0])[:3]}",
@@ -139,7 +139,7 @@ async def pause_song(_, message):
     vc = call[str(message.chat.id)]
     vc.pause_playout()
     await message.reply_text(
-        "**Paused The Music, Send `/resume` To Resume.**", quote=False
+        "**Musik di pause, Kirim `/resume` Untuk mengulang.**", quote=False
     )
 
 
@@ -152,7 +152,7 @@ async def resume_song(_, message):
     vc = call[str(message.chat.id)]
     vc.resume_playout()
     await message.reply_text(
-        "**Resumed, Send `/pause` To Pause The Music.**", quote=False
+        "**Diulang, Kirim `/pause` Untuk memberhentikan sementara musik.**", quote=False
     )
 
 
@@ -163,7 +163,7 @@ async def resume_song(_, message):
 )
 async def volume_bot(_, message):
     vc = call[str(message.chat.id)]
-    usage = "**Usage:**\n/volume [1-200]"
+    usage = "**Penggunaan:**\n/volume [1-200]"
     if len(message.command) != 2:
         await message.reply_text(usage, quote=False)
         return
@@ -176,7 +176,7 @@ async def volume_bot(_, message):
     except ValueError:
         await message.reply_text(usage, quote=False)
         return
-    await message.reply_text(f"**Volume Set To {volume}**", quote=False)
+    await message.reply_text(f"**Volume diset ke {volume}**", quote=False)
 
 
 @app.on_message(
@@ -187,7 +187,7 @@ async def volume_bot(_, message):
 async def queuer(_, message):
     global queue
     try:
-        usage = "**Usage:**\n__**/play youtube/saavn/deezer Song_Name**__"
+        usage = "**Penggunaan:**\n__**/play youtube/saavn/deezer Nama musik**__"
         if len(message.command) < 3:
             await message.reply_text(usage, quote=False)
             return
@@ -201,13 +201,13 @@ async def queuer(_, message):
             return
         await message.delete()
         if len(queue) > 0:
-            await message.reply_text("__**Added To Queue.__**", quote=False)
+            await message.reply_text("__**Ditambahkan diantrian.__**", quote=False)
         queue.append(
             {
                 "service": service,
-                "song": song_name,
-                "requested_by": requested_by,
-                "message": message,
+                "Lagu": song_name,
+                "Request dari": requested_by,
+                "Pesan": message,
             }
         )
         await play()
@@ -222,11 +222,11 @@ async def skip(_, message):
     global playing
     if len(queue) == 0:
         await message.reply_text(
-            "__**Queue Is Empty, Just Like Your Life.**__", quote=False
+            "__**Antrian Kosong, Sama Seperti Hidup Kamu.**__", quote=False
         )
         return
     playing = False
-    await message.reply_text("__**Skipped!**__", quote=False)
+    await message.reply_text("__**Diskip!**__", quote=False)
     await play()
 
 
@@ -242,7 +242,7 @@ async def queue_list(_, message):
         for song in queue:
             text += (
                 f"**{i}. Platform:** __**{song['service']}**__ "
-                + f"| **Song:** __**{song['song']}**__\n"
+                + f"| **Lagu:** __**{song['song']}**__\n"
             )
             i += 1
         m = await message.reply_text(text, quote=False)
@@ -251,7 +251,7 @@ async def queue_list(_, message):
 
     else:
         m = await message.reply_text(
-            "__**Queue Is Empty, Just Like Your Life.**__", quote=False
+            "__**Antrian Kosong, Sama Seperti Hidup Anda.**__", quote=False
         )
         await delete(message)
         await m.delete()
@@ -304,7 +304,7 @@ async def play():
 async def deezer(requested_by, query, message):
     global playing
     m = await message.reply_text(
-        f"__**Searching for {query} on Deezer.**__", quote=False
+        f"__**Mencari untuk {query} di Deezer.**__", quote=False
     )
     try:
         songs = await arq.deezer(query, 1)
@@ -318,17 +318,17 @@ async def deezer(requested_by, query, message):
         artist = songs[0].artist
         url = songs[0].url
     except Exception:
-        await m.edit("__**Found No Song Matching Your Query.**__")
+        await m.edit("__**Tidak Ditemukan Lagu yang Sesuai dengan Kueri Anda.**__")
         playing = False
         return
-    await m.edit("__**Generating Thumbnail.**__")
+    await m.edit("__**Menghasilkan Thumbnail.**__")
     await generate_cover_square(requested_by, title, artist, duration, thumbnail)
-    await m.edit("__**Downloading And Transcoding.**__")
+    await m.edit("__**Mendownload dan Transcoding.**__")
     await download_and_transcode_song(url)
     await m.delete()
     caption = (
-        f"🏷 **Name:** [{title[:35]}]({url})\n⏳ **Duration:** {duration}\n"
-        + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** Deezer"
+        f"🏷 **Nama:** [{title[:35]}]({url})\n⏳ **Duration:** {duration}\n"
+        + f"🎧 **Request dari:** {message.from_user.mention}\n📡 **Platform:** Deezer"
     )
     m = await message.reply_photo(
         photo="final.png",
@@ -346,7 +346,7 @@ async def deezer(requested_by, query, message):
 async def jiosaavn(requested_by, query, message):
     global playing
     m = await message.reply_text(
-        f"__**Searching for {query} on JioSaavn.**__", quote=False
+        f"__**Mencari {query} di JioSaavn.**__", quote=False
     )
     try:
         songs = await arq.saavn(query)
@@ -361,20 +361,20 @@ async def jiosaavn(requested_by, query, message):
         sduration = songs[0].duration
         sduration_converted = convert_seconds(int(sduration))
     except Exception as e:
-        await m.edit("__**Found No Song Matching Your Query.**__")
+        await m.edit("__**Tidak Ditemukan Lagu yang Sesuai dengan Kueri Anda.**__")
         print(str(e))
         playing = False
         return
-    await m.edit("__**Processing Thumbnail.**__")
+    await m.edit("__**Memproses Gambar Kecil.**__")
     await generate_cover_square(
         requested_by, sname, ssingers, sduration_converted, sthumb
     )
-    await m.edit("__**Downloading And Transcoding.**__")
+    await m.edit("__**Mendownload dan Transcoding.**__")
     await download_and_transcode_song(slink)
     await m.delete()
     caption = (
-        f"🏷 **Name:** {sname[:35]}\n⏳ **Duration:** {sduration_converted}\n"
-        + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** JioSaavn"
+        f"🏷 **Nama:** {sname[:35]}\n⏳ **Duration:** {sduration_converted}\n"
+        + f"🎧 **Request dari:** {message.from_user.mention}\n📡 **Platform:** JioSaavn"
     )
     m = await message.reply_photo(
         photo="final.png",
@@ -393,7 +393,7 @@ async def ytplay(requested_by, query, message):
     global playing
     ydl_opts = {"format": "bestaudio"}
     m = await message.reply_text(
-        f"__**Searching for {query} on YouTube.**__", quote=False
+        f"__**Mencari {query} di YouTube.**__", quote=False
     )
     try:
         results = await arq.youtube(query)
@@ -407,17 +407,17 @@ async def ytplay(requested_by, query, message):
         duration = results[0].duration
         views = results[0].views
         if time_to_seconds(duration) >= 1800:
-            await m.edit("__**Bruh! Only songs within 30 Mins.**__")
+            await m.edit("__**Bruh! Hanya lagu dalam waktu 30 menit.**__")
             playing = False
             return
     except Exception as e:
-        await m.edit("__**Found No Song Matching Your Query.**__")
+        await m.edit("__**Tidak Ditemukan Lagu yang Sesuai dengan Kueri Anda.**__")
         playing = False
         print(str(e))
         return
-    await m.edit("__**Processing Thumbnail.**__")
+    await m.edit("__**Memproses Thumbnail.**__")
     await generate_cover(requested_by, title, views, duration, thumbnail)
-    await m.edit("__**Downloading Music.**__")
+    await m.edit("__**Mendownload musik.**__")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
@@ -427,8 +427,8 @@ async def ytplay(requested_by, query, message):
     transcode("audio.webm")
     await m.delete()
     caption = (
-        f"🏷 **Name:** [{title[:35]}]({link})\n⏳ **Duration:** {duration}\n"
-        + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** YouTube"
+        f"🏷 **Nama:** [{title[:35]}]({link})\n⏳ **Duration:** {duration}\n"
+        + f"🎧 **Request dari:** {message.from_user.mention}\n📡 **Platform:** YouTube"
     )
     m = await message.reply_photo(
         photo="final.png",
@@ -450,37 +450,37 @@ async def tgplay(_, message):
     global playing
     if len(queue) != 0:
         await message.reply_text(
-            "__**You Can Only Play Telegram Files After The Queue Gets "
+            "__**Anda Hanya Dapat Memutar File Telegram Setelah Antrian Mendapat "
             + "Finished.**__",
             quote=False,
         )
         return
     if not message.reply_to_message:
-        await message.reply_text("__**Reply to an audio.**__", quote=False)
+        await message.reply_text("__**Reply ke audio.**__", quote=False)
         return
     if message.reply_to_message.audio:
         if int(message.reply_to_message.audio.file_size) >= 104857600:
             await message.reply_text(
-                "__**Bruh! Only songs within 100 MB.**__", quote=False
+                "__**Bruh! Hanya lagu dalam 100 MB.**__", quote=False
             )
             playing = False
             return
         duration = message.reply_to_message.audio.duration
         if not duration:
             await message.reply_text(
-                "__**Only Songs With Duration Are Supported.**__", quote=False
+                "__**Hanya Lagu Dengan Durasi Yang Didukung.**__", quote=False
             )
             return
-        m = await message.reply_text("__**Downloading.**__", quote=False)
+        m = await message.reply_text("__**Mendownload.**__", quote=False)
         song = await message.reply_to_message.download()
         await m.edit("__**Transcoding.**__")
         transcode(song)
-        await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
+        await m.edit(f"**Dimainkan** __**{message.reply_to_message.link}.**__")
         await asyncio.sleep(duration)
         playing = False
         return
     await message.reply_text(
-        "__**Only Audio Files (Not Document) Are Supported.**__", quote=False
+        "__**Hanya File Audio (Bukan Dokumen) Yang Didukung.**__", quote=False
     )
 
 
